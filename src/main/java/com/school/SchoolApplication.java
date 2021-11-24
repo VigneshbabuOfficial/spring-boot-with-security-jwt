@@ -1,22 +1,30 @@
 package com.school;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.modelmapper.ModelMapper;
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.school.entities.Users;
+import com.school.repos.UserRepository;
 import com.school.utils.RequestId;
 import com.school.utils.SchoolLogger;
 
 @SpringBootApplication(scanBasePackages = "com.school")
 public class SchoolApplication {
+	
+	@Autowired
+    private UserRepository repository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(SchoolApplication.class, args);
@@ -36,5 +44,16 @@ public class SchoolApplication {
 
 		return new RequestId( requestId.toString() );
 	}
+	
+	@PostConstruct
+    public void initUsers() {
+        List<Users> users = Stream.of(
+                new Users(101L, "javatechie", "password", "javatechie@gmail.com"),
+                new Users(102L, "user1", "pwd1", "user1@gmail.com"),
+                new Users(103L, "user2", "pwd2", "user2@gmail.com"),
+                new Users(104L, "user3", "pwd3", "user3@gmail.com")
+        ).collect(Collectors.toList());
+        repository.saveAllAndFlush(users);
+    }
 	
 }
