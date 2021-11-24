@@ -1,6 +1,7 @@
 package com.school;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -47,13 +48,22 @@ public class SchoolApplication {
 	
 	@PostConstruct
     public void initUsers() {
-        List<Users> users = Stream.of(
-                new Users(101L, "javatechie", "password", "javatechie@gmail.com"),
-                new Users(102L, "user1", "pwd1", "user1@gmail.com"),
-                new Users(103L, "user2", "pwd2", "user2@gmail.com"),
-                new Users(104L, "user3", "pwd3", "user3@gmail.com")
-        ).collect(Collectors.toList());
-        repository.saveAllAndFlush(users);
-    }
+
+		List<Users> dbUsers = repository.findAll();
+		
+
+		if (!dbUsers.isEmpty()) {
+
+			repository.deleteAllInBatch(dbUsers);
+		}
+
+		List<Users> users = new ArrayList<>();
+
+		users.add(new Users(102L, "user1", "pwd1", "user1@gmail.com"));
+		users.add(new Users(103L, "user2", "pwd2", "user2@gmail.com"));
+		users.add(new Users(104L, "user3", "pwd3", "user3@gmail.com"));
+
+		repository.saveAll(users);
+	}
 	
 }
