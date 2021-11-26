@@ -20,42 +20,55 @@ import com.school.config.util.JwtUtil;
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private MyUserDetailService userDetailsService;
+	@Autowired
+	private MyUserDetailService userDetailsService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+	@Autowired
+	private JwtUtil jwtUtil;
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+			throws ServletException, IOException {
 
-        final String authorizationHeader = request.getHeader("Authorization");
+		final String authorizationHeader = request.getHeader("Authorization");
 
-        String username = null;
-        String jwt = null;
+		String username = null;
+		String jwt = null;
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            jwt = authorizationHeader.substring(7);
-            username = jwtUtil.extractUsername(jwt);
-        }
+		try {
 
-        System.out.println(" JwtRequestFilter.doFilterInternal - "+authorizationHeader+" , jwt - "+jwt+" , username = "+username);
+			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ") && !"/authenticate/error".equals(request.getServletPath()) ) {
+				jwt = authorizationHeader.substring(7);
+				username = jwtUtil.extractUsername(jwt);
+			}
+		} catch (Exception e) {
+			
+			System.out.println(" JwtRequestFilter.doFilterInternal - " + authorizationHeader +", message ="+e.getMessage()+", exception ="+e);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+			if(e.getMessage().contains("JWT expired at")) {
+				System.out.println(" JwtRequestFilter.doFilterInternal - request.getContextPath() " + request.getContextPath());
+				response.sendRedirect(request.getContextPath() + "/authenticate/error");
+			}
+		}
 
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+		System.out.println(" JwtRequestFilter.doFilterInternal - " + authorizationHeader + " , jwt - " + jwt
+				+ " , username = " + username);
+		System.out.println(" request - " + request.getServletPath());
 
-            if (jwtUtil.validateToken(jwt, userDetails)) {
+		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                usernamePasswordAuthenticationToken
-                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-            }
-        }
-        chain.doFilter(request, response);
-    }
+			UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+
+			if (jwtUtil.validateToken(jwt, userDetails) && userDetailsService.isTokenExpired(username)) {
+
+				UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+						userDetails, null, userDetails.getAuthorities());
+				usernamePasswordAuthenticationToken
+						.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+				SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+			}
+		}
+		chain.doFilter(request, response);
+	}
 
 }

@@ -1,5 +1,7 @@
 package com.school.entities;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -7,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -23,6 +26,10 @@ public class Users{
     private String userName;
     private String password;
     private String email;
+    private String token;
+    private LocalDateTime tokenExpirationDate;
+    @ColumnDefault(value = "false")
+    private boolean loggedIn;
     
 	public Users() {
 		super();
@@ -57,6 +64,24 @@ public class Users{
 	}
 	public void setEmail(String email) {
 		this.email = email;
+	}
+	public String getToken() {
+		return token;
+	}
+	public void setToken(String token) {
+		this.token = token;
+	}
+	public LocalDateTime getTokenExpirationDate() {
+		return tokenExpirationDate;
+	}
+	public void setTokenExpirationDate(LocalDateTime tokenExpirationDate) {
+		this.tokenExpirationDate = tokenExpirationDate;
+	}
+	public boolean isLoggedIn() {
+		return loggedIn;
+	}
+	public void setLoggedIn(boolean loggedIn) {
+		this.loggedIn = loggedIn;
 	}
     
     

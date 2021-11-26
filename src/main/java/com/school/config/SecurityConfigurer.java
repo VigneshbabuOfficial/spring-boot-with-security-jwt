@@ -14,30 +14,30 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @SuppressWarnings("deprecation")
 @EnableWebSecurity
-public class SecurityConfigurer extends WebSecurityConfigurerAdapter  {
-	
+public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
+
 	private static final String LOG_STR = "SecurityConfigurer.%s";
 
 	@Autowired
 	private MyUserDetailService myUserDetailService;
-	
+
 	@Autowired
 	private JwtRequestFilter jwtRequestFilter;
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		
+
 		System.out.println(String.format(LOG_STR, "configure") + " , auth = " + auth);
-		
+
 		auth.userDetailsService(myUserDetailService);
-		
+
 	}
-	
+
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return NoOpPasswordEncoder.getInstance();
 	}
-	
+
 	@Override
 	@Bean
 	public AuthenticationManager authenticationManagerBean() throws Exception {
@@ -46,14 +46,13 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter  {
 
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-		httpSecurity.csrf().disable()
-				.authorizeRequests().antMatchers("/login/authenticate").permitAll().
-						anyRequest().authenticated().and().
-						exceptionHandling().and().sessionManagement()
+
+		httpSecurity.csrf().disable().authorizeRequests().antMatchers("/authenticate/login","/authenticate/refresh","/authenticate/error").permitAll().anyRequest()
+				.authenticated().and().exceptionHandling().and().sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
 	}
-	
-	
+
 }

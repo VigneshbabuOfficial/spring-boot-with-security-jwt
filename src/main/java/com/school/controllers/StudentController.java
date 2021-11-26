@@ -155,5 +155,23 @@ public class StudentController {
 
 		return service.deleteAllStudents();
 	}
+	
+	/*
+	 * @RequestMapping("/refresh") public ResponseEntity<JsonNode>
+	 * refreshTokenError() {
+	 * 
+	 * logger.info(String.format(LOG_STR, "refreshTokenError"));
+	 * 
+	 * ObjectNode responseNode = JsonNodeFactory.instance.objectNode();
+	 * 
+	 * responseNode.put(CommonConstants.RESPONSE, CommonConstants.ERROR);
+	 * 
+	 * ArrayNode errorsArr = responseNode.putArray("errors");
+	 * 
+	 * errorsArr.addObject().put(CommonConstants.ERRORCODE,
+	 * CommonConstants).put(CommonConstants.MESSAGE, error.getDefaultMessage());
+	 * 
+	 * return new ResponseEntity<>(responseNode, HttpStatus.BAD_REQUEST); }
+	 */ 
 
 }
