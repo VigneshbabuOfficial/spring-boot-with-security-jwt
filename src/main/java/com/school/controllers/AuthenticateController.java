@@ -65,7 +65,7 @@ public class AuthenticateController {
 
 		Users loggedinUser = userRepository.findByUserName(userName);
 
-		LocalDateTime nowDateTime = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(15L).withNano(0);
+		LocalDateTime nowDateTime = LocalDateTime.now(ZoneId.of("UTC")).plusDays(1L).withNano(0);
 
 		loggedinUser.setToken(jwt);
 		loggedinUser.setTokenExpirationDate(nowDateTime);
@@ -90,7 +90,7 @@ public class AuthenticateController {
 
 		String jwt = null;
 
-		LocalDateTime nowDateTime = LocalDateTime.now(ZoneId.of("UTC")).plusMinutes(15L).withNano(0);
+		LocalDateTime nowDateTime = LocalDateTime.now(ZoneId.of("UTC")).plusDays(1L).withNano(0);
 
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 			jwt = authorizationHeader.substring(7);
@@ -99,7 +99,7 @@ public class AuthenticateController {
 		System.out.println(
 				"AuthenticateController - refreshAuthenticationToken - authorizationHeader = " + authorizationHeader);
 
-		Users loggedinUser = userRepository.findByToken(jwt);
+		Users loggedinUser = userRepository.findByTokenAndLoggedInTrue(jwt);
 
 		if (Objects.isNull(loggedinUser)) {
 			return new ResponseEntity<>(new AuthenticationResponse(jwt, nowDateTime, "sorry! Invalid Token"),
@@ -137,10 +137,10 @@ public class AuthenticateController {
 
 		String userName = jwtTokenUtil.extractUsername(jwt);
 
-		Users loggedinUser = userRepository.findByUserName(userName);
+		Users loggedinUser = userRepository.findByUserNameAndLoggedInTrue(userName);
 
 		loggedinUser.setToken(null);
-		loggedinUser.setTokenExpirationDate(loggedinUser.getTokenExpirationDate().minusMinutes(1L));
+		loggedinUser.setTokenExpirationDate(loggedinUser.getTokenExpirationDate().minusDays(1L));
 		loggedinUser.setLoggedIn(false);
 		userRepository.saveAndFlush(loggedinUser);
 

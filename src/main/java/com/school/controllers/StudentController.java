@@ -55,7 +55,7 @@ public class StudentController {
 			@RequestParam(name = "q", required = false) String globalSearch,
 			@RequestParam(name = "page", required = false, defaultValue = "1") int page,
 			@RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
-			@RequestParam(name = "sort", required = false) List<String> sortingList) {
+			@RequestParam(name = "sort", required = false, defaultValue = "name:asc") List<String> sortingList) {
 
 		logger.info(String.format(LOG_STR, "getAllStudents") + ", queryData = " + specs + ", globalSearch = "
 				+ globalSearch + ", page = " + page + ", limit = " + limit + ", sorting-list = "
@@ -155,7 +155,7 @@ public class StudentController {
 
 		return service.deleteAllStudents();
 	}
-	
+
 	/*
 	 * @RequestMapping("/refresh") public ResponseEntity<JsonNode>
 	 * refreshTokenError() {
@@ -172,6 +172,6 @@ public class StudentController {
 	 * CommonConstants).put(CommonConstants.MESSAGE, error.getDefaultMessage());
 	 * 
 	 * return new ResponseEntity<>(responseNode, HttpStatus.BAD_REQUEST); }
-	 */ 
+	 */
 
 }

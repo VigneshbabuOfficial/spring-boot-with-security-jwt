@@ -18,4 +18,7 @@ public class CommonConstants {
 	public static final String ACCESS_DENIED = "ACCESS_DENIED";
 	public static final String INVALID_TOKEN = "INVALID_TOKEN";
 	public static final String INVALID_TOKEN_MSG = "Sorry! Token is expired. Please refresh once.";
+	public static final String RESPONSE_STR = "response";
+	public static final String DATA = "data";
+	public static final String SUCCESS_LOWER_STR = "success";
 }

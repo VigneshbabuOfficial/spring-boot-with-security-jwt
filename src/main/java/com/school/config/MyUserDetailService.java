@@ -53,13 +53,17 @@ public class MyUserDetailService implements UserDetailsService {
 				new ArrayList<>());
 	}
 
-	public boolean isTokenExpired(String username) {
+	public boolean isValidUser(String jwtToken, String username) {
 
-		System.out.println(String.format(LOG_STR, "isTokenExpired") + " , username = " + username);
+		System.out.println(String.format(LOG_STR, "isValidUser")+", jwtToken = "+jwtToken + " , username = " + username);
 
-		Users user = repository.findByUserName(username);
+		Users user = repository.findByUserNameAndToken(username,jwtToken);
 		
-		return user.getTokenExpirationDate().isAfter(LocalDateTime.now( ZoneId.of( "UTC" ) ).withNano( 0 ));
+		if(Objects.isNull(user)) {
+			return false;
+		}
+		
+		return user.getTokenExpirationDate().isAfter(LocalDateTime.now( ZoneId.of( "UTC" ) ).withNano( 0 )) && user.isLoggedIn() == true;
 
 	}
 

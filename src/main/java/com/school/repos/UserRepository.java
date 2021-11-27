@@ -12,4 +12,10 @@ public interface UserRepository extends JpaRepository<Users, Long>{
 
 	Users findByToken(String token);
 
+	Users findByUserNameAndToken(String jwtToken, String username);
+
+	Users findByUserNameAndLoggedInTrue(String userName);
+
+	Users findByTokenAndLoggedInTrue(String jwt);
+
 }
