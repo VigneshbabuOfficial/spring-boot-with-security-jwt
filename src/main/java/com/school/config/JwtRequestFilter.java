@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.school.config.util.JwtUtil;
+import com.school.utils.CommonConstants;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -37,10 +38,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 		try {
 
-			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ") && !"/authenticate/error".equals(request.getServletPath()) ) {
+			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ") && !"/authenticate/refresh".equals(request.getServletPath()) && !"/authenticate/error".equals(request.getServletPath()) ) {
 				jwt = authorizationHeader.substring(7);
 				username = jwtUtil.extractUsername(jwt);
 			}
+			
 		} catch (Exception e) {
 			
 			System.out.println(" JwtRequestFilter.doFilterInternal - " + authorizationHeader +", message ="+e.getMessage()+", exception ="+e);

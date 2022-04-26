@@ -11,12 +11,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.school.entities.Users;
 import com.school.repos.UserRepository;
-import com.school.utils.CommonConstants;
 
 @Service
 public class MyUserDetailService implements UserDetailsService {
@@ -34,19 +30,9 @@ public class MyUserDetailService implements UserDetailsService {
 		System.out.println(String.format(LOG_STR, "loadUserByUsername") + " , username = " + username);
 
 		if (Objects.isNull(user)) {
+			
+			throw new UsernameNotFoundException("Incorrect username or password");
 
-			ObjectNode responseNode = JsonNodeFactory.instance.objectNode();
-
-			responseNode.put(CommonConstants.RESPONSE, CommonConstants.ERROR);
-
-			ArrayNode errorsArr = responseNode.putArray("errors");
-
-			errorsArr.addObject().put(CommonConstants.ERRORCODE, "ACCESS_DENIED").put(CommonConstants.MESSAGE,
-					"Invalid User name");
-
-			System.out.println(String.format(LOG_STR, "loadUserByUsername") + " , responseNode = " + responseNode);
-
-			return null;
 		}
 
 		return new org.springframework.security.core.userdetails.User(user.getUserName(), user.getPassword(),

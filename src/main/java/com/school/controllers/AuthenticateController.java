@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +29,7 @@ import com.school.repos.UserRepository;
 import com.school.utils.CommonConstants;
 
 @RestController
-@RequestMapping("/authenticate")
+@RequestMapping(value = "/authenticate")
 public class AuthenticateController {
 
 	@Autowired
@@ -49,17 +50,24 @@ public class AuthenticateController {
 
 		System.out.println("AuthenticateController - authenticationRequest = " + authenticationRequest.getUsername()
 				+ " - " + authenticationRequest.getPassword());
-
-		try {
-			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-					authenticationRequest.getUsername(), authenticationRequest.getPassword()));
-		} catch (BadCredentialsException e) {
-			throw new Exception("Incorrect username or password", e);
-		}
-
+		
 		String userName = authenticationRequest.getUsername();
 
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
+
+		try {
+			Authentication authDetails = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+					authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+			
+			if( authDetails == null  ) {
+				
+				throw new Exception("Incorrect username or password");
+				
+			}
+			
+		} catch (BadCredentialsException e) {
+			throw new Exception("Incorrect username or password", e);
+		}
 
 		final String jwt = jwtTokenUtil.generateToken(userDetails);
 
@@ -84,7 +92,7 @@ public class AuthenticateController {
 		String authorizationHeader = request.getHeader("Authorization");
 
 		if (authorizationHeader == null) {
-			return new ResponseEntity<>(new AuthenticationResponse("", null, "sorry! authorizationHeader is missed"),
+			return new ResponseEntity<>(new AuthenticationResponse("", null, "sorry! Authorization Header is not found in the request."),
 					HttpStatus.BAD_REQUEST);
 		}
 

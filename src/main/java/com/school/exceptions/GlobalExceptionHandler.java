@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -250,58 +252,67 @@ public class GlobalExceptionHandler {
 	 * 
 	 * }
 	 */
-	
+
 	@ExceptionHandler({ Exception.class })
 	public ResponseEntity<JsonNode> handleException(Exception ex, WebRequest request) {
 
 		logger.error("GlobalExceptionHandler.handleException() ", ex);
 
 		ObjectNode responseData = JsonNodeFactory.instance.objectNode();
-		
+
 		responseData.put(CommonConstants.RESPONSE, CommonConstants.ERROR);
 
 		ArrayNode errorsArr = responseData.putArray(CommonConstants.ERRORS);
 
 		if (ex.getCause() instanceof NumberFormatException) {
-			
-			errorsArr.addObject().put(CommonConstants.ERRORCODE, CommonConstants.INVALID_DATA).put(CommonConstants.MESSAGE,
+
+			errorsArr.addObject().put(CommonConstants.ERRORCODE, CommonConstants.INVALID_DATA).put(
+					CommonConstants.MESSAGE,
 					"Invalid Data = " + ex.getMessage().split(":")[2].replaceAll("\"\"", "").trim());
 
-		}  else if (ex.getClass() == HttpMessageNotReadableException.class
+		} else if (ex.getClass() == HttpMessageNotReadableException.class
 				&& ex.getMessage().contains("JSON parse error:")
 				|| ex.getClass() == ConstraintDefinitionException.class) {
 
 			String fieldName = ex.getMessage().split("\n")[1].split("\"")[1];
-			
-			errorsArr.addObject().put(CommonConstants.ERRORCODE, CommonConstants.INVALID_DATA).put(CommonConstants.MESSAGE,
-					"Input parameter type mismatched for " + fieldName);
+
+			errorsArr.addObject().put(CommonConstants.ERRORCODE, CommonConstants.INVALID_DATA)
+					.put(CommonConstants.MESSAGE, "Input parameter type mismatched for " + fieldName);
 
 		} else if (ex.getClass() == HttpMessageNotReadableException.class
 				&& ex.getMessage().contains("Required request body is missing:")) {
 
-			errorsArr.addObject().put(CommonConstants.ERRORCODE, CommonConstants.INVALID_DATA).put(CommonConstants.MESSAGE,
-					"Required request body is missing");
+			errorsArr.addObject().put(CommonConstants.ERRORCODE, CommonConstants.INVALID_DATA)
+					.put(CommonConstants.MESSAGE, "Required request body is missing");
 
 		} else if (ex.getClass() == ConstraintViolationException.class) {
 
 			List<String> obList = Arrays.asList(ex.getMessage().split(","));
 
 			for (int i = 0; i < obList.size(); i++) {
-				
-				errorsArr.addObject().put(CommonConstants.ERRORCODE, CommonConstants.INVALID_DATA).put(CommonConstants.MESSAGE,
-						obList.get(i).split(":")[1].trim());
+
+				errorsArr.addObject().put(CommonConstants.ERRORCODE, CommonConstants.INVALID_DATA)
+						.put(CommonConstants.MESSAGE, obList.get(i).split(":")[1].trim());
 
 			}
 
-		} else if( ex.getClass() == HttpRequestMethodNotSupportedException.class  ) {
+		} else if (ex.getClass() == HttpRequestMethodNotSupportedException.class) {
+
+			errorsArr.addObject().put(CommonConstants.ERRORCODE, CommonConstants.INVALID_DATA)
+					.put(CommonConstants.MESSAGE, ex.getMessage());
+
+		} else if (ex.getCause() instanceof BadCredentialsException || ex.getCause() instanceof UsernameNotFoundException || ex.getClass() == UsernameNotFoundException.class) {
 			
+
 			errorsArr.addObject().put(CommonConstants.ERRORCODE, CommonConstants.INVALID_DATA).put(CommonConstants.MESSAGE,
-					ex.getMessage());
+					"Invalid username or password");
 			
-		} else {
-			
-			errorsArr.addObject().put(CommonConstants.ERRORCODE, CommonConstants.INVALID_DATA).put(CommonConstants.MESSAGE,
-					CommonConstants.SYSTEM_ERROR_OCCURRED);
+		}
+
+		else {
+
+			errorsArr.addObject().put(CommonConstants.ERRORCODE, CommonConstants.INVALID_DATA)
+					.put(CommonConstants.MESSAGE, CommonConstants.SYSTEM_ERROR_OCCURRED);
 
 		}
 
